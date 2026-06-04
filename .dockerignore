@@ -1,0 +1,4 @@
+node_modules
+.git
+books
+server/books

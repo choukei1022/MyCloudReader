@@ -1,0 +1,36 @@
+services:
+  mycloudreader:
+    container_name: my-cloud-reader
+    
+    # 👑 核心改变 1：不再使用网上的生肉镜像，而是使用我们当前目录的 Dockerfile 编译出属于你的专属精简镜像！
+    build: .
+    image: mycloudreader:v2  # 给编译出来的镜像起个帅气的名字
+    
+    restart: unless-stopped
+    
+    # 👑 引入之前我们建好的 .env 环境变量文件 (密码配置)
+    env_file:
+      - .env
+      
+    ports:
+      - "48888:3000"
+      
+    volumes:
+      # 👇 ================= 你专属的文件库与字体映射 (完美保留) ================= 👇
+      
+      # 1. 基础书库 (飞牛 OS DISK1)
+      - /vol1/1000/DISK1/Docker/MyCloudReader/books:/app/books
+      
+      # 2. 巨型外部书库 (DISK2)：完美挂载到了 books 下面的分类中！
+      # FTS5 毫秒级引擎会自动进去扫描并建立统一检索！
+      - /vol2/1000/DISK2/xbook:/app/books/ExtLibrary
+      
+      # 3. 字体文件夹
+      - /vol1/1000/DISK1/Docker/MyCloudReader/fonts:/app/fonts
+      
+      # 👑 核心改变 2：干掉了源码映射 (./:/app) 和 node_modules 映射。
+      # 因为我们的多阶段 Dockerfile 已经把纯净的代码和依赖打包进了镜像内部。
+      # 这意味着你的容器现在金身不破，绝对不会因为宿主机的垃圾文件导致依赖冲突！
+
+    # 👑 核心改变 3：干掉了臃肿的 command 命令。
+    # 容器启动动作已交由 Dockerfile 最后的 CMD ["node", "server/server.js"] 接管，实现 1秒 极速启动！
