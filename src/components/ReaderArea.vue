@@ -6,7 +6,8 @@
 <template>
   <div id="vue-reader" class="reader-container" ref="readerRef" @scroll="onReaderScroll" @click="handleReaderClick">
       
-      <div id="content" class="content-wrapper" v-show="!store.isEditMode && !store.isFullEditMode && !isPdfView">
+      <!-- 👑 修复 1：增加 !isWordView 保护原有的 TXT 渲染区不被污染 -->
+      <div id="content" class="content-wrapper" v-show="!store.isEditMode && !store.isFullEditMode && !isPdfView && !isWordView">
           <div v-if="!store.currentBookPath" class="welcome-box">
               <h2>重构完成！</h2>
               <p>Vue 3 现代化模块引擎已成功组装。告别巨石代码，拥抱纯净渲染。</p>
@@ -35,6 +36,9 @@
               <div v-else style="height: 50px;"></div>
           </template>
       </div>
+
+      <!-- 👑 修复 2：新增 Word 专属响应式渲染舱！ -->
+      <div id="word-view" class="content-wrapper word-view" v-show="!store.isEditMode && !store.isFullEditMode && isWordView" v-html="wordHtmlContent"></div>
       
       <textarea id="edit-area" ref="editAreaRef" class="edit-area" v-model="editContent" v-show="store.isEditMode || store.isFullEditMode" @click.stop></textarea>
       <div class="edit-controls" v-show="store.isEditMode || store.isFullEditMode" @click.stop>
@@ -69,7 +73,9 @@ const editAreaRef = ref(null)
 const pdfViewRef = ref(null)
 
 const isPdfView = ref(false)
-const pendingScrollPercent = ref(0) 
+const isWordView = ref(false)       // 👑 新增：标识当前是否为 Word 视图
+const wordHtmlContent = ref('')     // 👑 新增：存放 Word 转换出来的 HTML
+const pendingScrollPercent = ref(0)
 
 // --- 挂载引擎 ---
 const { getBlockStartIdx, getRenderRange, currentChapterTitle, parsedParagraphs } = useTextRenderer();
@@ -177,13 +183,17 @@ async function loadBook(path) {
     
     // PDF 处理
     if (nameLower.endsWith('.pdf')) {
-        isPdfView.value = true; store.currentTab = 'files';
+        isPdfView.value = true;
+        isWordView.value = false; // 👑 状态重置
+        store.currentTab = 'files';
         await loadPDF(path); return;
     }
     
     // Word 处理
     if (nameLower.endsWith('.docx')) {
-        isPdfView.value = false; store.currentTab = 'chapters';
+        isPdfView.value = false;
+        isWordView.value = true; // 👑 激活 Word 视图
+        store.currentTab = 'chapters';
         try {
             const res = await apiFetch(`/api/book?path=${encodeURIComponent(path)}`);
             const arrayBuffer = await res.arrayBuffer();
@@ -202,7 +212,10 @@ async function loadBook(path) {
                 }
             });
             store.chaptersData = tempArr;
-            document.querySelector('.content-wrapper').innerHTML = tempDiv.innerHTML;
+            
+            // 👑 绝杀：摒弃危险的 DOM 操作，直接赋值给 Vue 响应式变量！
+            wordHtmlContent.value = tempDiv.innerHTML;
+            
             if(readerRef.value) readerRef.value.scrollTop = 0; 
             store.bookTitle = path.split('/').pop().replace('.docx','');
             store.bookFormatHint = '[Word]';
@@ -211,7 +224,9 @@ async function loadBook(path) {
     }
 
     // TXT 处理
-    isPdfView.value = false; store.currentTab = 'chapters';
+    isPdfView.value = false; 
+    isWordView.value = false; // 👑 状态重置
+    store.currentTab = 'chapters';
     try {
         const res = await apiFetch(`/api/book?path=${encodeURIComponent(path)}`);
         const buffer = await res.arrayBuffer();
@@ -256,6 +271,8 @@ async function loadBook(path) {
 .welcome-box { text-align: center; margin-top: 50px; color: var(--text-muted); }
 .content-wrapper p { margin-bottom: var(--para-space, 1.2em); line-height: inherit; text-indent: 2em; }
 .chapter-title { text-align: center; font-size: 1.5em; font-weight: bold; margin-top: 30px; margin-bottom: 30px; color: var(--text); text-indent: 0; }
+/* 👑 防止 Word 里的图片撑爆手机屏幕 */
+:deep(.word-view img) { max-width: 100%; height: auto; display: block; margin: 15px auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 :deep(.merged-chapter-title) { text-align: center; font-size: 1.25em; font-weight: bold; color: var(--primary); margin: 50px 0 30px 0; text-indent: 0; position: relative; }
 :deep(.merged-chapter-title::after) { content: ""; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 40px; height: 2px; background: var(--border-light); }
 .volume-cover-page { display: flex; align-items: center; justify-content: center; min-height: 40vh; margin: 40px 0; user-select: none; }
