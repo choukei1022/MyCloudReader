@@ -8,6 +8,18 @@
 
 这是一款专为 NAS（如飞牛 OS、群晖、极空间等）和 Docker 环境打造的跨平台私人阅读器。
 
+界面如下：
+PC浏览器
+<img width="1909" height="912" alt="image" src="https://github.com/user-attachments/assets/f024d3a6-2dd1-42ad-94c6-1b36ed0eb902" />
+
+手机端浏览器：
+
+
+<img width="399" height="824" alt="image" src="https://github.com/user-attachments/assets/57d60a20-1f1d-40a9-8bee-950d09b4964b" /><img width="399" height="824" alt="image" src="https://github.com/user-attachments/assets/10a5dc8a-033d-412b-806c-df59e0591b4c" />
+
+
+
+
 ## 💡 开发初衷
 
 我已经很多年不写代码了。最初做这个东西，纯粹是因为想在自己的 NAS 上存几万本 TXT 小说，并且能在手机和电脑上随时随地看，还要能同步阅读进度。
@@ -15,6 +27,8 @@
 早期的代码是靠着 AI 一点点“搓”出来的单体大杂烩。后来为了长久维护，我花了些时间把它按照现代企业级的标准重构了一遍：**前后端完全解耦、引入 Vue 3 组合式函数 (Composables) 提取业务逻辑、使用 Docker 多阶段构建缩减体积**。
 
 现在的代码比较干净，自己用得很舒服，开源出来给大家图个乐，或者给想用 AI 辅助写全栈项目的朋友做个参考。
+
+发到GitHub上面的初衷就是我已经没有什么改进的想法了，简单来说就是没啥思路继续改进了，欢迎大家提Issues来帮我改进这个项目。
 
 ## ✨ 核心功能
 
@@ -42,3 +56,5 @@
 ACCESS_PASSWORD=your_password_here
 # 内部端口（通常无需修改）
 PORT=3000
+
+最后，上面的话都是AI帮我写的，应该大差不差，有兴趣的下载回去玩玩呗。
