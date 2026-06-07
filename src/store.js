@@ -5,7 +5,8 @@ import { apiFetch } from './utils/request.js'; // 引入解耦后的网络模块
 const DEFAULT_CONFIG = {
     theme: 'light', fontSize: 18, lineHeight: 1.6, paraSpace: 1.2, 
     contentWidth: 800, uiFontFamily: 'sans-serif', readerFontFamily: 'sans-serif', 
-    showBackToTop: true, primaryColor: 'blue', sidebarWidth: 260
+    showBackToTop: true, primaryColor: 'blue', sidebarWidth: 260,
+    paragraphIndent: true // 👑 新增：首行缩进开关（默认开启）
 };
 
 export const store = reactive({

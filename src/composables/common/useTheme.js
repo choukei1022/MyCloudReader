@@ -30,6 +30,8 @@ export function useTheme() {
         root.style.setProperty('--font-size', newConf.fontSize + 'px');
         root.style.setProperty('--line-height', newConf.lineHeight);
         root.style.setProperty('--para-space', newConf.paraSpace + 'em');
+        // 👑 新增：根据开关，动态分配 2个字符(2em) 或者 0 个缩进
+        root.style.setProperty('--para-indent', newConf.paragraphIndent ? '2em' : '0'); 
         root.style.setProperty('--content-w', newConf.contentWidth + 'px');
         root.style.setProperty('--ui-font', newConf.uiFontFamily);
         root.style.setProperty('--reader-font', newConf.readerFontFamily);

@@ -1,7 +1,7 @@
 /* 
- * 文件路径：src/composables/useEditEngine.js
+ * 文件路径：src/composables/reader/useEditEngine.js
  * 主要作用：【逻辑外脑】编辑模式与正文的双向同步引擎。
- * 包含功能：根据滚动百分比或绝对字数计算，保证在“阅读视图”和“编辑视图”切换时，光标严丝合缝地停留在同一行，并处理最终的热更保存。
+ * 包含功能：利用“绝对行数百分比”算法，精准同步“阅读视图”和“全书编辑视图”的光标位置，彻底解决长文本的视觉扭曲问题。
  */
 import { ref, watch, nextTick } from 'vue';
 import { store, apiFetch } from '../../store.js';
@@ -26,18 +26,38 @@ export function useEditEngine(readerRef, editAreaRef, pendingScrollPercent, getR
 
     watch(() => store.isFullEditMode, async (isFull) => {
         if(isFull) {
+            // 1. 获取当前阅读区所在的章节起点和当前百分比
             const scrollPercent = readerRef.value.scrollTop / Math.max(1, readerRef.value.scrollHeight - readerRef.value.clientHeight);
             const range = getRenderRange();
             const absolutePos = range.start + ((range.end - range.start) * scrollPercent);
-            const totalPercent = absolutePos / store.currentFileText.length;
+            
+            // 👑 终极同步算法：抛弃字符百分比，改用“绝对行数百分比”
+            const textBefore = store.currentFileText.substring(0, absolutePos);
+            const linesBefore = (textBefore.match(/\n/g) || []).length;
+            const totalLines = (store.currentFileText.match(/\n/g) || []).length || 1;
+            const linePercent = linesBefore / totalLines;
             
             editContent.value = store.currentFileText; 
             await nextTick(); 
-            if (editAreaRef.value) editAreaRef.value.scrollTop = totalPercent * Math.max(1, editAreaRef.value.scrollHeight - editAreaRef.value.clientHeight);
+            if (editAreaRef.value) {
+                editAreaRef.value.scrollTop = linePercent * Math.max(1, editAreaRef.value.scrollHeight - editAreaRef.value.clientHeight);
+            }
         } else {
             if (editAreaRef.value) {
-                const totalPercent = editAreaRef.value.scrollTop / Math.max(1, editAreaRef.value.scrollHeight - editAreaRef.value.clientHeight);
-                const absolutePos = totalPercent * store.currentFileText.length;
+                // 1. 获取全书编辑区的滚动行数百分比
+                const scrollPercent = editAreaRef.value.scrollTop / Math.max(1, editAreaRef.value.scrollHeight - editAreaRef.value.clientHeight);
+                
+                // 👑 逆向计算：根据行数百分比，推算出真实的绝对字符位置
+                const totalLines = (store.currentFileText.match(/\n/g) || []).length || 1;
+                const targetLine = Math.floor(scrollPercent * totalLines);
+                
+                let absolutePos = 0;
+                const linesArr = store.currentFileText.split('\n');
+                for (let i = 0; i < targetLine && i < linesArr.length; i++) {
+                    absolutePos += linesArr[i].length + 1; // 补偿被 split 吃掉的回车符
+                }
+                
+                // 2. 将计算出的真实字符位置映射回章节进度
                 let targetIdx = store.chaptersData.findIndex(ch => absolutePos >= ch.start && absolutePos < ch.end);
                 if (targetIdx === -1) targetIdx = store.chaptersData.length - 1;
                 
@@ -68,8 +88,17 @@ export function useEditEngine(readerRef, editAreaRef, pendingScrollPercent, getR
         store.bookTitle = originalTitle;
         
         if (store.isFullEditMode && editAreaRef.value) {
-            const totalPercent = editAreaRef.value.scrollTop / Math.max(1, editAreaRef.value.scrollHeight - editAreaRef.value.clientHeight);
-            const absolutePos = totalPercent * store.currentFileText.length;
+            // 保存时也使用行数算法进行精准定位还原
+            const scrollPercent = editAreaRef.value.scrollTop / Math.max(1, editAreaRef.value.scrollHeight - editAreaRef.value.clientHeight);
+            const totalLines = (store.currentFileText.match(/\n/g) || []).length || 1;
+            const targetLine = Math.floor(scrollPercent * totalLines);
+            
+            let absolutePos = 0;
+            const linesArr = store.currentFileText.split('\n');
+            for (let i = 0; i < targetLine && i < linesArr.length; i++) {
+                absolutePos += linesArr[i].length + 1; 
+            }
+            
             let targetIdx = store.chaptersData.findIndex(ch => absolutePos >= ch.start && absolutePos < ch.end);
             if (targetIdx === -1) targetIdx = store.chaptersData.length - 1;
             const c = store.chaptersData[targetIdx];

@@ -269,7 +269,7 @@ async function loadBook(path) {
 .reader-container { width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; background: transparent; }
 .content-wrapper { width: 100%; max-width: var(--content-w, 800px); margin: 0 auto; box-sizing: border-box; padding: 0 20px; font-family: var(--reader-font, sans-serif); font-size: var(--font-size, 18px); line-height: var(--line-height, 2.2); color: var(--text); }
 .welcome-box { text-align: center; margin-top: 50px; color: var(--text-muted); }
-.content-wrapper p { margin-bottom: var(--para-space, 1.2em); line-height: inherit; text-indent: 2em; }
+.content-wrapper p { margin-bottom: var(--para-space, 1.2em); line-height: inherit; text-indent: var(--para-indent, 2em); }
 .chapter-title { text-align: center; font-size: 1.5em; font-weight: bold; margin-top: 30px; margin-bottom: 30px; color: var(--text); text-indent: 0; }
 /* 👑 防止 Word 里的图片撑爆手机屏幕 */
 :deep(.word-view img) { max-width: 100%; height: auto; display: block; margin: 15px auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }

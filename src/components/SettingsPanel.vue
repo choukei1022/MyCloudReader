@@ -17,6 +17,11 @@
                 <button class="set-btn" :class="{ active: !store.config.showBackToTop }" @click="store.updateConfig('showBackToTop', false)">关闭</button>
             </div></div>
 
+            <div class="set-row"><span class="row-label">首行缩进</span><div class="set-ctrls">
+                <button class="set-btn" :class="{ active: store.config.paragraphIndent }" @click="store.updateConfig('paragraphIndent', true)">开启</button>
+                <button class="set-btn" :class="{ active: !store.config.paragraphIndent }" @click="store.updateConfig('paragraphIndent', false)">关闭</button>
+            </div></div>
+
             <div class="set-row"><span class="row-label">强调色</span><div class="set-ctrls">
                 <button class="set-btn color-btn" :class="{ active: store.config.primaryColor === 'blue' }" @click="store.updateConfig('primaryColor', 'blue')"><div class="color-dot" style="background:#3b6991;"></div> 蓝</button>
                 <button class="set-btn color-btn" :class="{ active: store.config.primaryColor === 'green' }" @click="store.updateConfig('primaryColor', 'green')"><div class="color-dot" style="background:#10b981;"></div> 绿</button>
