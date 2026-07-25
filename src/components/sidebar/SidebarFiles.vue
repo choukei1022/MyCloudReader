@@ -78,10 +78,14 @@
               <button class="hero-btn btn-ghost" @click="store.clipboard = null">取消</button>
           </div>
           <div class="m-actions">
-              <label class="hero-btn btn-primary">上传小说文档<input type="file" multiple accept=".txt,.pdf,.docx" style="display:none" @change="uploadFiles($event.target.files)"></label>
+              <label class="hero-btn btn-primary">上传小说文档
+                <input type="file" multiple accept=".txt,.pdf,.docx" style="display:none" @change="uploadFiles($event)">
+              </label>
               <div style="display:flex; gap:8px;">
                   <button class="hero-btn btn-ghost" style="flex:1;" @click="makeDir">新建分类</button>
-                  <label class="hero-btn btn-ghost" style="flex:1;">批量传文件夹<input type="file" webkitdirectory directory multiple style="display:none" @change="uploadFiles($event.target.files)"></label>
+                  <label class="hero-btn btn-ghost" style="flex:1;">批量传文件夹
+                    <input type="file" webkitdirectory directory multiple style="display:none" @change="uploadFiles($event)">
+                  </label>
               </div>
           </div>
       </div>
